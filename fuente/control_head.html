@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abastible · Control en vivo</title>
+<style>
+__FONTS__
+:root{--or:#FE5000;--or2:#FF7A33;--az:#001489;--az2:#003594;--ink:#F3F5FB;--mute:#9AA3C7;--line:rgba(255,255,255,.12);--card:#0B1442;--bg:#050A2C;--ok:#22C55E;--warn:#F5B301;--bad:#FF4D4D}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"Ubuntu Sans",system-ui,sans-serif;font-size:15px;min-height:100vh}
+header{display:flex;align-items:center;gap:16px;padding:12px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+header img{height:38px}
+header h1{font-size:24px;font-weight:700;letter-spacing:.5px;line-height:1}
+header h1 em{font-style:normal;color:var(--or2);font-weight:500}
+.conn{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dot{width:12px;height:12px;border-radius:50%;background:#555;flex:none}
+.dot.ok{background:var(--ok);box-shadow:0 0 0 3px rgba(34,197,94,.28)}.dot.wait{background:var(--warn)}.dot.err{background:var(--bad)}
+#cstat{font-size:14px;color:var(--mute);min-width:140px}
+input,select,textarea{background:#030722;border:1px solid var(--line);color:var(--ink);font:inherit;padding:7px 10px;width:100%;min-width:0;border-radius:8px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--or)}
+.conn input{width:auto}
+button{font-family:"Ubuntu Sans",sans-serif;font-weight:700;font-size:14px;letter-spacing:.6px;text-transform:uppercase;padding:9px 14px;border:1px solid var(--line);background:#16205A;color:var(--ink);cursor:pointer;white-space:nowrap;border-radius:999px}
+button:hover{border-color:var(--or2)}
+button:disabled{opacity:.5;cursor:default}
+button.pri{background:var(--or);border-color:var(--or)}button.pri:hover{background:var(--or2)}
+button.on{background:var(--ok);border-color:var(--ok);color:#00170A}
+main{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px;padding:14px 18px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.card h2{font-size:19px;font-weight:800;letter-spacing:1.5px;display:flex;align-items:center;gap:10px;text-transform:uppercase}
+.card h2::before{content:"";width:14px;height:11px;background:var(--or);border-radius:60% 50% 55% 45%/60% 60% 40% 40%;transform:rotate(-14deg)}
+.card h2 .sp{margin-left:auto;display:flex;gap:6px;align-items:center}
+.card h2 .sp button{font-size:12px;padding:6px 10px}
+.wide{grid-column:1/-1}
+.span2{grid-column:span 2}@media (max-width:900px){.span2{grid-column:auto}}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>*{flex:1}
+.row>button{flex:0 0 auto}
+label{font-size:11px;letter-spacing:1.5px;color:var(--mute);display:block;margin-bottom:4px;text-transform:uppercase;font-weight:500}
+.f{flex:1;min-width:100px}
+.big{font-size:17px;padding:13px 16px}
+.sw{display:flex;align-items:center;gap:8px;font-size:14px;color:#D6DBF0;cursor:pointer;user-select:none;text-transform:none;letter-spacing:0;font-weight:400;margin:0}
+.sw input{width:auto}
+table{width:100%;border-collapse:collapse}
+td,th{border-bottom:1px solid var(--line);padding:4px 4px;text-align:left;font-weight:400;vertical-align:middle}
+th{font-size:11px;letter-spacing:1.5px;color:var(--mute);font-weight:500}
+td input{padding:5px 7px;border-color:transparent;background:transparent;border-radius:6px}
+td input:hover{border-color:var(--line)}
+tr.cur td{background:rgba(254,80,0,.16)}
+td.n{width:30px;color:var(--mute);font-weight:700}
+td button{font-size:11px;padding:5px 9px}
+.fl{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+.scenes{display:flex;flex-wrap:wrap;gap:8px}
+.scenes button.cur{background:var(--or);border-color:var(--or)}
+.scenes button.prev{border-color:var(--ok);color:var(--ok)}
+.scenes.pvw button{border-color:rgba(34,197,94,.45)}
+.scenes.pvw button.prev{background:var(--ok);color:#00170A;border-color:var(--ok)}
+.scenes.pvw button.cur{background:transparent;border-color:var(--or2);color:var(--or2)}
+.scenes.pvw button i{font-style:normal;font-size:11px;opacity:.7;margin-right:6px;border:1px solid currentColor;padding:0 4px;border-radius:3px}
+.hint{font-size:13px;color:var(--mute);line-height:1.5}
+kbd{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:#000;border:1px solid var(--line);padding:0 5px;border-radius:4px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);background:var(--or);font-weight:700;font-size:15px;padding:10px 22px;border-radius:999px;transition:transform .2s;z-index:9;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast.on{transform:translateX(-50%)}
+.onair{font-size:11px;font-weight:700;letter-spacing:1.5px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--mute)}
+.onair.v{background:var(--or);border-color:var(--or);color:#fff}
+.chk{list-style:none;display:flex;flex-direction:column;gap:6px}
+.chk li{padding:8px 10px 8px 34px;background:#060C33;border:1px solid var(--line);border-radius:10px;position:relative;font-size:14px;line-height:1.35}
+.chk li::before{position:absolute;left:12px;top:8px;font-weight:700}
+.chk li.ok::before{content:"✓";color:var(--ok)}.chk li.bad::before{content:"✕";color:var(--bad)}.chk li.warn::before{content:"!";color:var(--warn)}.chk li.pend::before{content:"…";color:var(--mute)}
+.chk li small{display:block;color:var(--mute);font-size:12px}
+.topfix{position:sticky;top:0;z-index:6;background:rgba(5,10,44,.97);box-shadow:0 10px 24px rgba(0,0,0,.5)}
+.monitor{display:grid;grid-template-columns:minmax(260px,440px) 1fr;gap:14px;padding:10px 18px 12px;border-bottom:3px solid var(--or)}
+.mon-ctl{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mon-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lbl2{font-size:12px;font-weight:700;letter-spacing:2px;color:var(--mute)}
+.monitor .scenes button{font-size:12px;padding:7px 11px}
+.pvh{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px}
+.pv{aspect-ratio:16/9;background:#000;border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+.pv img{width:100%;height:100%;object-fit:contain;position:absolute;inset:0}
+.pv span{color:var(--mute);font-size:14px;text-align:center;padding:0 10px}
+@media (max-width:760px){.monitor{grid-template-columns:1fr}.mon-pv{max-width:360px}}
+.now{display:flex;align-items:center;gap:10px;background:#030722;border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 14px;min-width:0;flex:1}
+.now b{font-size:13px;color:var(--or2);white-space:nowrap}
+.now span{flex:1;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now button{padding:6px 10px}
+.rec{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;font-weight:700;font-size:12px;letter-spacing:1.5px;color:var(--mute);background:#000;white-space:nowrap}
+.rec i{width:11px;height:11px;border-radius:50%;background:#444;flex:none}
+.rec.on{color:#fff;border-color:var(--bad)}.rec.on i{background:var(--bad);box-shadow:0 0 0 3px rgba(255,77,77,.3);animation:recb 1s steps(1) infinite}
+.rec.save{color:#fff;border-color:var(--warn)}.rec.save i{background:var(--warn);animation:none}
+@keyframes recb{50%{opacity:.2}}
+details summary{cursor:pointer;color:var(--mute);font-size:13px}
+.tp{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;padding:8px;border:1px solid var(--line);border-radius:12px;background:#060C33}
+.tp button{flex:1;min-width:70px;font-size:12px;padding:8px 6px}
+.tp button.on{background:var(--warn);color:#000;border-color:var(--warn)}
+.tp .tpst{flex-basis:100%;display:flex;justify-content:space-between;font-size:11px;letter-spacing:1.5px;color:var(--mute)}
+.tp .tpst b{color:#fff;font-weight:700}
+.tp input[type=range]{flex-basis:100%;accent-color:var(--or)}
+.tp.off{opacity:.45}
+.hlg{border-bottom:1px solid var(--line)}
+.hlg>.hh{display:flex;align-items:center;gap:8px;padding:7px 9px;cursor:pointer;background:#0A1240}
+.hlg.cur>.hh{background:rgba(254,80,0,.18);border-left:4px solid var(--or)}
+.hlg>.hh .tt{flex:1;min-width:0;line-height:1.2}
+.hlg>.hh .tt b{font-size:14px}
+.hlg>.hh .tt span{display:block;font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hlg>.hh .cnt{font-size:12px;font-weight:700;background:#000;border:1px solid var(--line);padding:2px 8px;border-radius:10px}
+.hlg>.hh button{font-size:11px;padding:5px 9px}
+.hlg .cl{display:none;padding:2px 8px 6px 22px}.hlg.open .cl{display:block}
+.hlg .ci{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:13px;border-top:1px dashed rgba(255,255,255,.07)}
+.hlg .ci span{flex:1}.hlg .ci button{font-size:11px;padding:4px 8px}
+.hlg .car{color:var(--mute);width:14px}.hlg.open .car{transform:rotate(90deg)}
+.ppl{display:flex;flex-wrap:wrap;gap:6px;max-height:220px;overflow:auto;padding:2px}
+.ppl button{text-transform:none;letter-spacing:0;font-weight:500;font-size:13px;text-align:left;border-radius:12px;padding:7px 12px;line-height:1.2}
+.ppl button small{display:block;color:var(--mute);font-size:11px}
+.ppl button.on{background:var(--ok);color:#00170A}.ppl button.on small{color:#00330F}
+#fl td:nth-child(3){width:30%}
+.hstw{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}.hstpv{flex:0 0 288px;height:162px;border-radius:10px;overflow:hidden;position:relative;background:repeating-conic-gradient(#1a2150 0 25%,#141a42 0 50%) 0 0/24px 24px}.hstpv iframe{position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;transform:scale(.15);transform-origin:0 0;pointer-events:none}.hstg{flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;min-width:180px}.hstg button.cur{background:var(--or,#FE5000);color:#fff;border-color:transparent}
+
+/* pulido Impeccable: contraste del texto sobre naranjo, estados sin brillo difuso */
+button.pri,button.pri:hover,.scenes button.cur,.toast,.onair.v,.hstg button.cur{color:var(--bg)}
+.dot.ok{box-shadow:0 0 0 3px rgba(34,197,94,.28)}
+.rec.on i{box-shadow:0 0 0 3px rgba(255,77,77,.3)}
+.pv img[src=""],.pv img:not([src]){display:none}
+</style></head>
+<body>
+<div class="topfix">
+<header>
+  <img src="__LOGO__" alt="Abastible">
+  <h1>Control en vivo <em id="hev">· Evento</em></h1>
+  <div class="conn">
+    <span class="dot" id="cdot"></span><span id="cstat">OBS sin conectar</span>
+    <input id="host" value="localhost" size="10" title="Equipo donde corre OBS">
+    <input id="port" value="4455" size="5" title="Puerto">
+    <input id="pass" type="password" placeholder="Contraseña WebSocket" size="18">
+    <button class="pri" id="bconn">Conectar</button>
+  </div>
+</header>
+<div class="monitor">
+  <div class="mon-pv">
+    <div class="pvh"><label class="sw"><input type="checkbox" id="pvon" checked> Al aire</label><span id="pvname" class="hint"></span></div>
+    <div class="pv"><img id="pv" alt="Vista de la escena al aire" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" style="display:none"><span id="pvmsg">Conecta OBS para ver la pantalla</span></div>
+  </div>
+  <div class="mon-ctl">
+    <div class="mon-row">
+      <div class="now"><b id="m_n">BLOQUE 1</b><span id="m_t">—</span><button id="m_prev">◀</button><button class="pri" id="m_next">Siguiente ▶</button></div>
+      <span class="rec" id="m_rec" title="Búfer de repetición"><i></i><b>REC</b></span><button class="pri" id="m_rb">⏪ Repetir</button><button id="m_hl">★ Momento</button>
+    </div>
+    <div class="mon-row"><span class="lbl2">ESCENAS</span><label class="sw" style="margin-left:auto"><input type="checkbox" id="toprev"> A vista previa (modo estudio)</label></div>
+    <div class="scenes" id="scenes"><span class="hint">Conecta OBS para ver tus escenas aquí.</span></div>
+    <div class="mon-row" style="margin-top:4px"><span class="lbl2" style="color:var(--ok)">A VISTA PREVIA</span><span class="hint" style="margin-left:auto">teclas <kbd>1</kbd>–<kbd>9</kbd> · con <kbd>Shift</kbd> va directo al aire</span></div>
+    <div class="scenes pvw" id="scenesPv"></div>
+    <div class="mon-row"><button class="pri" id="btrans" style="flex:1">Transición (modo estudio)</button></div>
+    <div class="scenes" id="trsel"></div>
+  </div>
+</div>
+</div>
+<main>
+  <!-- AGENDA -->
+  <section class="card span2">
+    <h2>Programa del evento <span class="sp"><span class="onair v" id="air-blk">BLOQUE 1</span><button id="bprev">◀ Anterior</button><button class="pri" id="bnext">Siguiente ▶</button></span></h2>
+    <div class="fl"><table><thead><tr><th>#</th><th>HORA</th><th>CHARLA / BLOQUE</th><th>ORADOR</th><th>CARGO</th><th>EMPRESA</th><th></th></tr></thead><tbody id="fl"></tbody></table></div>
+    <div class="row"><label class="sw" style="flex:2"><input type="checkbox" id="autolt"> Al pasar de bloque, mostrar el lower third del orador</label><label class="sw" style="flex:2"><input type="checkbox" id="autotema" checked> Al pasar de bloque, actualizar el tema en pantalla</label><button id="badd">+ Fila</button></div>
+    <details><summary>Pegar programa completo (un bloque por línea)</summary>
+      <p class="hint" style="margin:6px 0">Formato: <kbd>09:30 | Título de la charla | Orador | Cargo | Empresa</kbd> (orador, cargo y empresa son opcionales)</p>
+      <textarea id="paste" rows="6" placeholder="10:00 | Resultados 2026 | Nombre Apellido | Gerente Comercial | Abastible"></textarea>
+      <div class="row" style="margin-top:6px"><button class="pri" id="bpaste">Cargar programa</button><button id="bdemo">↺ Programa de ejemplo</button></div>
+    </details>
+  </section>
+  <!-- LOWER THIRD -->
+  <section class="card">
+    <h2>Lower third <span class="sp"><span class="onair" id="air-lt">OCULTO</span></span></h2>
+    <div class="row"><button class="pri big" id="blt_cur" style="flex:1">Orador del bloque actual</button><button class="big" id="blth">Ocultar</button></div>
+    <div class="row"><div class="f"><label>Se oculta solo después de</label><select id="lt_auto"><option value="0">No ocultar solo</option><option value="6">6 segundos</option><option value="8">8 segundos</option><option value="10">10 segundos</option><option value="15">15 segundos</option></select></div></div>
+    <label>Todas las personas · clic para mostrar</label>
+    <div class="ppl" id="ppl"></div>
+    <label style="margin-top:4px">Otra persona</label>
+    <div class="row"><div class="f" style="flex:2"><input id="lt_nombre" placeholder="Nombre Apellido"></div><div class="f"><input id="lt_cargo" placeholder="Cargo"></div><div class="f"><input id="lt_emp" placeholder="Empresa"></div></div>
+    <div class="row"><button class="pri" id="blt">Mostrar</button><button id="bltsave">Guardar en la lista</button><span class="hint">Clic derecho en una persona guardada para quitarla.</span></div>
+  </section>
+  <!-- TEMA -->
+  <section class="card">
+    <h2>Tema en pantalla <span class="sp"><span class="onair" id="air-tema">OCULTO</span></span></h2>
+    <p class="hint">Etiqueta arriba a la izquierda con la charla que está en curso. Se actualiza sola al pasar de bloque.</p>
+    <div class="row"><button class="pri" id="tm_show">Mostrar</button><button id="tm_hide">Ocultar</button></div>
+    <div class="row"><div class="f"><label>Etiqueta</label><input id="tm_k" value="AHORA"></div><div class="f" style="flex:2"><label>Texto (vacío = título del bloque)</label><input id="tm_t" placeholder="Título del bloque actual"></div></div>
+    <label class="sw"><input type="checkbox" id="tm_sub" checked> Agregar el nombre del orador</label>
+  </section>
+  <!-- MENSAJE -->
+  <section class="card">
+    <h2>Mensaje inferior <span class="sp"><span class="onair" id="air-msg">OCULTO</span></span></h2>
+    <div class="row"><button class="pri" id="ms_show">Mostrar</button><button id="ms_hide">Ocultar</button></div>
+    <div class="row"><div class="f"><label>Etiqueta</label><input id="ms_l" value="PREGUNTAS"></div><div class="f"><label>Cambia cada (s)</label><input id="ms_e" type="number" min="4" max="60" value="10"></div></div>
+    <div><label>Mensajes (uno por línea; si es largo, se desplaza)</label><textarea id="ms_list" rows="3">Envía tus preguntas por el chat de la transmisión
+Síguenos en abastible.cl</textarea></div>
+  </section>
+  <!-- MOSCA -->
+  <section class="card">
+    <h2>Mosca <span class="sp"><span class="onair" id="air-mosca">EN PANTALLA</span></span></h2>
+    <div class="row"><button class="pri" id="mo_show">Mostrar</button><button id="mo_hide">Ocultar</button></div>
+    <div class="row">
+      <div class="f"><label>Posición</label><select id="mo_pos"><option value="tr">Arriba derecha</option><option value="tl">Arriba izquierda</option><option value="br">Abajo derecha</option><option value="bl">Abajo izquierda</option></select></div>
+      <div class="f"><label>Tamaño</label><select id="mo_scale"><option value="0.5">Muy pequeña</option><option value="0.65">Pequeña</option><option value="0.8">Mediana</option><option value="1" selected>Normal</option><option value="1.2">Grande</option></select></div>
+      <div class="f"><label>Opacidad</label><input type="range" id="mo_op" min="0.3" max="1" step="0.05" value="1"></div>
+    </div>
+    <div class="row"><label class="sw" style="flex:0 0 auto"><input type="checkbox" id="mo_live" checked> Indicador</label><div class="f"><input id="mo_estado" value="EN VIVO"></div></div>
+    <div><label class="sw"><input type="checkbox" id="mo_msgs" checked> Mensajes que rotan (uno por línea, cada 6 s)</label><textarea id="mo_list" rows="2" style="margin-top:6px">abastible.cl</textarea></div>
+  </section>
+  <!-- PANTALLAS -->
+  <section class="card">
+    <h2>Pantallas completas</h2>
+    <label>Inicio · cuenta regresiva</label>
+    <div class="row"><div class="f" style="flex:2"><select id="ini_mode"><option value="hora">Hasta la hora de inicio del evento</option><option value="min">Minutos desde que pulso INICIAR</option><option value="none">Sin cuenta (muestra la hora)</option></select></div><div class="f"><input id="ini_min" type="number" min="1" max="180" value="10" title="Minutos"></div><button class="pri" id="ini_go">Iniciar</button></div>
+    <label style="margin-top:6px">Pausa</label>
+    <div class="row"><div class="f" style="flex:2"><input id="pa_t" value="VOLVEMOS EN UNOS MINUTOS"></div><div class="f"><input id="pa_s" placeholder="Subtítulo (ej: Pausa café)"></div></div>
+    <div class="row"><div class="f"><input id="pa_min" type="number" min="0" max="120" value="10" title="Minutos de cuenta (0 = sin cuenta)"></div><button class="pri" id="pa_go">Iniciar cuenta</button><button id="pa_stop">Quitar cuenta</button><label class="sw"><input type="checkbox" id="pa_next" checked> Mostrar "A continuación"</label></div>
+    <label style="margin-top:6px">Orador y final</label>
+    <div class="row"><div class="f"><label>Etiqueta pantalla orador</label><input id="or_k" value="A CONTINUACIÓN"></div><div class="f" style="flex:2"><label>Título pantalla final</label><input id="fi_t" value="GRACIAS POR ACOMPAÑARNOS"></div></div>
+    <div class="row"><div class="f"><label>Foto del orador actual (opcional)</label><input type="file" id="or_foto" accept="image/*"></div><button id="or_fx">Quitar foto</button></div>
+  </section>
+  <!-- REPETICIONES -->
+  <section class="card">
+    <h2>Repeticiones <span class="sp"><span class="rec" id="rb_rec"><i></i><b>REC</b></span><span class="onair" id="rb-state">BÚFER APAGADO</span></span></h2>
+    <div class="row"><button class="pri big" id="rb_play" style="flex:2">⏪ Repetir ahora</button><button class="big" id="rb_save">★ Guardar momento</button></div>
+    <div class="row">
+      <div class="f"><label>Velocidad</label><select id="rb_speed"><option value="100" selected>Normal</option><option value="75">75 %</option><option value="50">Lenta 50 %</option><option value="35">Súper lenta 35 %</option></select></div>
+      <div class="f"><label>Duración</label><select id="rb_len"><option value="5">Últimos 5 s</option><option value="10">Últimos 10 s</option><option value="15" selected>Últimos 15 s</option><option value="20">Últimos 20 s</option><option value="30">Últimos 30 s</option></select></div>
+      <button id="rb_start" style="align-self:flex-end">Iniciar búfer</button>
+    </div>
+    <div class="f"><label>Al terminar la repetición</label><select id="rb_after"><option value="estudio" selected>Ir a ESTUDIO (transición automática)</option><option value="preview">Pasar la vista previa al aire</option><option value="back">Volver a la escena anterior</option><option value="stay">Quedarse en REPLAY</option></select></div>
+    <label>Control de la repetición en pantalla</label>
+    <div class="tp off" id="tp">
+      <div class="tpst"><span id="tp_st">SIN REPETICIÓN</span><span>VELOCIDAD <b id="tp_sp">—</b></span></div>
+      <button id="tp_rew" style="flex-basis:100%">◀◀ Rebobinar</button>
+      <button id="tp_back5">⏪ −5 s</button><button id="tp_back2">◀ −2 s</button><button id="tp_backplay">⏪▶ Atrás y play</button><button id="tp_pause">❚❚ Pausa</button>
+      <button id="tp_fwd2">+2 s ▶▶</button><button id="tp_restart">↺ De nuevo</button><button id="tp_slow">🐢 Lenta</button><button id="tp_speed">⚡ Velocidad</button>
+      <input type="range" id="tp_pos" min="0" max="1000" value="0">
+    </div>
+    <div><label>Momentos por bloque <span id="rb_count"></span></label><div class="fl" style="max-height:240px" id="rb_list"></div></div>
+    <label class="sw"><input type="checkbox" id="rb_pref"> Guardar los archivos con el nombre del bloque (ABAS B03 …)</label>
+    <div class="row"><button class="pri" id="rb_reel">▶ Resumen del bloque</button><button id="rb_reelall">▶ Resumen de todo</button><button id="rb_stop">■ Detener</button><button id="rb_clean">🗑 Borrar otros bloques</button></div>
+    <p class="hint">Atajos: <kbd>P</kbd> repetir ahora · <kbd>M</kbd> guardar momento. OBS guarda siempre los últimos 30 s.</p>
+  </section>
+  <!-- EVENTO -->
+  <section class="card">
+    <h2>Datos del evento</h2>
+    <div><label>Nombre del evento</label><input id="ev_nombre" class="ev"></div>
+    <div><label>Lema / bajada</label><input id="ev_lema" class="ev"></div>
+    <div class="row"><div class="f" style="flex:2"><label>Fecha (como se lee en pantalla)</label><input id="ev_fecha" class="ev"></div><div class="f"><label>Hora de inicio</label><input id="ev_hora" class="ev" placeholder="09:00"></div></div>
+    <div class="row"><div class="f"><label>Lugar</label><input id="ev_lugar" class="ev"></div><div class="f"><label>Dirección · ciudad</label><input id="ev_dir" class="ev"></div></div>
+    <div class="row"><div class="f"><label>Web</label><input id="ev_web" class="ev"></div><div class="f"><label>Hashtag / redes</label><input id="ev_hashtag" class="ev"></div></div>
+    <div><label>Etiqueta de la pantalla de inicio</label><input id="ev_kicker_ini" class="ev"></div>
+    <p class="hint">Todo se actualiza al instante en las pantallas.</p>
+  </section>
+  <!-- PICTURE IN PICTURE -->
+  <section class="card">
+    <h2>Picture in picture</h2>
+    <p class="hint">Escenas <b>PIP_PRESENTACION</b>, <b>PIP_DOS</b>, <b>PIP_TRES</b>, <b>PIP_VERTICAL</b> y <b>PIP_ESQUINA</b>. Cada una trae una fuente de color en cada ventana, del tamaño justo: reemplázala por tu cámara, presentación o video. Los nombres de abajo aparecen bajo cada ventana.</p>
+    <div><label>Título (arriba a la izquierda, opcional)</label><input id="pip_t" placeholder="Panel de conversación"></div>
+    <div class="row"><div class="f" style="flex:2"><label>Ventana A · nombre</label><input id="pip_an"></div><div class="f"><label>Cargo</label><input id="pip_ac"></div></div>
+    <div class="row"><div class="f" style="flex:2"><label>Ventana B · nombre</label><input id="pip_bn"></div><div class="f"><label>Cargo</label><input id="pip_bc"></div></div>
+    <div class="row"><div class="f" style="flex:2"><label>Ventana C · nombre (solo tres cámaras)</label><input id="pip_cn"></div><div class="f"><label>Cargo</label><input id="pip_cc"></div></div>
+    <div class="row"><button id="pip_cur">Persona actual en la ventana A</button><button id="pip_clr">Limpiar nombres</button><button id="pip_inst">⚙ Rehacer ventanas PiP</button></div>
+  </section>
+  <!-- TRANSICIONES HTML -->
+  <section class="card">
+    <h2>Transiciones HTML <span class="sp"><span class="onair" id="air-hst">SOLO MANUAL</span></span></h2>
+    <p class="hint">Animaciones de marca hechas en HTML. La animación tapa la pantalla y, justo a la mitad, el control cambia la escena con un corte: el cambio nunca se ve.</p>
+    <div class="hstw"><div class="hstpv"><iframe id="hst_pv" title="Vista previa" scrolling="no"></iframe></div>
+      <div class="hstg" id="hst_g"></div></div>
+    <div class="row">
+      <div class="f"><label>Duración</label><select id="hst_dur"><option value="1.5">1,5 s (rápida)</option><option value="2" selected>2 s</option><option value="3">3 s</option><option value="4">4 s</option></select></div>
+      <label class="sw" style="align-self:flex-end"><input type="checkbox" id="hst_snd" checked> Con sonido</label>
+    </div>
+    <div class="row"><button class="pri big" id="hst_go" style="flex:2">🎬 Vista previa al aire con esta</button><button class="big" id="hst_test">▶ Probar</button></div>
+    <label class="sw"><input type="checkbox" id="hst_use"> Usar esta animación en el botón TRANSICIÓN (y en el MIDI)</label>
+    <div class="row"><button id="hst_inst">⚙ Poner el stinger HTML en todas las escenas</button></div>
+    <p class="hint"><b>Probar</b> solo reproduce la animación, sin cambiar de escena. <b>Instalar gráficos</b> ya pone la fuente <i>ABAS Stinger HTML</i> encima de todo en cada escena; si creas escenas nuevas, pulsa el botón de arriba otra vez.</p>
+  </section>
+  <!-- OBS -->
+  <section class="card wide" id="setupcard">
+    <h2>Configurar OBS <span class="sp"><button id="bdiag">Revisar</button></span></h2>
+    <ul class="chk" id="chk"><li class="pend">Conecta OBS arriba para revisar la instalación.</li></ul>
+    <div class="row"><button class="pri big" id="binstall">⚙ Instalar gráficos en OBS</button><button class="big" id="breload">↻ Recargar gráficos</button></div>
+    <h2 style="font-size:16px;margin-top:6px">Transiciones</h2>
+    <ul class="chk" id="trl"><li class="pend">Pulsa AJUSTAR TRANSICIONES con OBS conectado.</li></ul>
+    <div class="row"><button class="pri big" id="btrfix">🎬 Ajustar transiciones</button></div>
+    <p class="hint">Crea en OBS (<b>Transiciones de escena → + → Stinger</b>) transiciones llamadas <b>ABAS Ola</b>, <b>ABAS Burbuja</b>, <b>ABAS Capsulas</b>, <b>ABAS Llama</b>, <b>ABAS Anillos</b> o <b>ABAS Mosaico</b> (agrega <b>Corta</b> al nombre para la versión de 2 s; pueden quedar vacías): este botón les pone el video según tu resolución y el punto de corte correcto. <b>INSTALAR</b> crea, si faltan, las escenas INICIO, ESTUDIO, ORADOR, AGENDA, PAUSA, REPLAY y FINAL con sus gráficos, y nunca borra nada. En ESTUDIO agrega tus cámaras debajo de los gráficos.</p>
+  </section>
+  <section class="card wide">
+    <h2>Cómo conectar</h2>
+    <p class="hint">1) En OBS: <b>Herramientas → Ajustes del servidor WebSocket</b> → marca <b>Habilitar servidor WebSocket</b> → <b>Mostrar información de conexión</b> y copia la contraseña. 2) Pégala arriba y pulsa <b>CONECTAR</b>. Para controlar desde otro PC de la misma red, escribe arriba la IP del PC de OBS en vez de <i>localhost</i> (primero haz INSTALAR una vez en el PC de OBS). 3) Abre <b>PANEL_MIDI.html</b> en este mismo Chrome si usas un controlador MIDI.</p>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+<script>
