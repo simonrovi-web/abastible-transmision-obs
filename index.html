@@ -7,7 +7,7 @@
 @font-face{font-family:"Ubuntu Sans";font-weight:700;font-display:swap;src:url(sitio/fonts/ubuntu-sans-latin-700-normal.woff2) format("woff2")}
 @font-face{font-family:"Ubuntu Sans";font-weight:800;font-display:swap;src:url(sitio/fonts/ubuntu-sans-latin-800-normal.woff2) format("woff2")}
 
-:root{--bg:#06103A;--bg2:#0B1A55;--card:#0E1F63;--line:rgba(255,255,255,.14);--ink:#F4F6FC;--mute:#AEB7DA;--acc:#FE5000;--accink:#06103A;--acc2:#FF7A33;--hero:linear-gradient(150deg,#FE5000 0%,#F44C00 45%,#E04600 100%);--heroink:#06103A;
+:root{--bg:#06103A;--bg2:#0B1A55;--card:#0E1F63;--line:rgba(255,255,255,.14);--ink:#F4F6FC;--mute:#AEB7DA;--acc:#FE5000;--accink:#06103A;--acc2:#FF7A33;--hero:linear-gradient(150deg,#FE5000 0%,#F44C00 45%,#E04600 100%);--heroink:#06103A;--herobtn:#FFFFFF;
  --disp:"Ubuntu Sans",system-ui,sans-serif;--body:"Ubuntu Sans",system-ui,sans-serif;--r:10px;--g:clamp(16px,4vw,48px)}
 *{box-sizing:border-box;margin:0}
 body{background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
@@ -29,7 +29,7 @@ a{color:inherit}
 .b:hover{transform:translateY(-1px)}
 .b--acc{background:var(--acc);border-color:var(--acc);color:var(--accink)}
 .top .b--big{min-height:48px;padding:12px 22px;font-size:16px}
-.top .b--acc{background:var(--heroink);border-color:var(--heroink);color:var(--bg)}
+.top .b--acc{background:var(--heroink);border-color:var(--heroink);color:var(--herobtn)}
 .b:focus-visible{outline:3px solid var(--acc2);outline-offset:3px}
 section{padding:clamp(48px,7vw,88px) 0;border-top:1px solid var(--line)}
 section:nth-of-type(even){background:var(--bg2)}
